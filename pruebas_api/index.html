@@ -7,9 +7,15 @@
 </head>
 <body>
 <script>
+
+    let tarea = "aprender React";
     
-    fetch("/api-todo",{
-        method: "DELETE"
+    fetch("/api-todo/crear",{
+        method: "POST",
+        body: JSON.stringify({tarea}),
+        headers: {
+            "Content-type" : "application/json"
+        }
     })
     .then(respuesta => respuesta.text())
     .then(respuesta => console.log(respuesta));
