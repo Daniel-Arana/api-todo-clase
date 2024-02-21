@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const {getTareas, crearTarea, borrarTarea} = require("./db");
+const {getTareas, crearTarea, borrarTarea, actualizarEstado, actualizarTexto} = require("./db");
 const {json} = require ("body-parser");
 
 const servidor = express();
@@ -42,14 +42,58 @@ servidor.post("/api-todo/crear", async (peticion, respuesta, siguiente) => {
 
 });
 
-servidor.put("/api-todo", (peticion, respuesta) => {
-    respuesta.send("metodo PUT");
+servidor.put("/api-todo/actualizar/:id([0-9]+)/:operacion(1/2)", async (peticion, respuesta, siguiente) => {
+    /*
+    let operacion = Number(peticion.params.operacion);
+
+    let operaciones = [actualizarEstado, actualizarTexto];
+
+    let {tarea} = peticion.body;//extraemos la tarea
+    
+    if (operacion == 1 && (!tarea || tarea.trim() == "")){
+        //si existe la operación 1 tiene que verificar que es distinto de tarea o que tiene algo escrito
+        return siguiente ({error: "falta el argumento tarea en el objeto JSON"});
+}
+
+    try{
+        let cantidad = await operaciones [operacion - 1](peticion.params.id, operacion == 1 ? tarea : null);
+        respuesta.json({resultado : cantidad ? "ok" : "ko"});
+
+    }catch(error){
+        respuesta.status(500);
+        respuesta.json(error);
+    }*/
+
+    /* otra forma de hacer lo mismo pero con if: */
+    if (peticion.params.operacion == 1){
+        let {tarea} = peticion.body;
+        if (tarea && tarea.trim() != ""){
+            try{
+                let cantidad = await actualizarEstado(peticion.params.id, tarea);
+                return respuesta.json({resultado : cantidad ? "ok" : "ko"});
+            }catch (error){
+                respuesta.status(500);
+                respuesta.json(error);
+            }
+        }
+
+        siguiente ({error : "falta el argumento tarea en el objeto JSON"});
+    } else{
+        try{
+            let cantidad = await actualizarTexto(peticion.params.id);
+            return respuesta.json({resultado : cantidad ? "ok" : "ko"})
+        }catch(error){
+            respuesta.status(500);
+            respuesta.json(error);
+        }
+    }
+
 });
 
-servidor.delete("/api-todo/borrar/:id", async (peticion, respuesta) => {
+servidor.delete("/api-todo/borrar/:id([0-9]+)", async (peticion, respuesta) => {
     try{
         let cantidad = await borrarTarea(peticion.params.id);
-        return respuesta.json({resultado : cantidad ? "ok" : "ko"});
+        return respuesta.json({resultado : cantidad ? "ok" : "ko"});//return sobra, aunque no hace nada si se queda
     } catch (error){
         respuesta.status(500);
         return respuesta.json(error);

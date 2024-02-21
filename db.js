@@ -44,7 +44,7 @@ function borrarTarea(id){
         let conexion = conectar();
 
         try{
-            let {count} = await conexion `DELETE FROM tarea WHERE id = ${id} `;//count dirá cuántas veces ha hecho la consulta
+            let {count} = await conexion `DELETE FROM tareas WHERE id = ${id} `;//count dirá cuántas veces ha hecho la consulta
             conexion.end();
             ok(count);
         } catch(error){
@@ -53,4 +53,32 @@ function borrarTarea(id){
     });
 }
 
-module.exports = {getTareas, crearTarea, borrarTarea};
+function actualizarEstado(id){
+    return new Promise(async (ok,ko) => {
+        let conexion = conectar();
+
+        try{
+            let {count} = await conexion `UPDATE tareas SET terminada = NOT terminada WHERE id = ${id} `;
+            conexion.end();
+            ok(count);
+        } catch(error){
+            ko({error : "error en base de datos"});
+        }
+    });
+}
+
+function actualizarTexto(id, tarea){
+    return new Promise(async (ok,ko) => {
+        let conexion = conectar();
+
+        try{
+            let {count} = await conexion `UPDATE tareas SET tarea = ${tarea} WHERE id = ${id} `;
+            conexion.end();
+            ok(count);
+        } catch(error){
+            ko({error : "error en base de datos"});
+        }
+    });
+}
+
+module.exports = {getTareas, crearTarea, borrarTarea, actualizarEstado, actualizarTexto};
